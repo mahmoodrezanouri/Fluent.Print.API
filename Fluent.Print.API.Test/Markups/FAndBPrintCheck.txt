@@ -1,0 +1,290 @@
+using System;
+using System.Linq;
+using System.Collections.Generic;
+using Fluent.Print.API;
+
+public class CSCodeEvaler
+{
+
+    public object SendPrint(dynamic order)
+    {
+        var documents = new List<IFluentPrintDocumentBuilder>();
+
+        foreach (var check in order.Checks)
+        {
+            var document =
+
+              PrintDocumentBuilder.Start()
+
+            #region Restaurant
+                .PrintLine(l => { l.Value = order.Restaurant.Name; l.SetStyle(s => { s.Align = TextAlign.Middle; s.Bold = true; }); })
+              .PrintLine(l => { l.Value = order.Restaurant.StreetAddress; l.SetStyle(s => { s.Align = TextAlign.Middle; }); })
+              .PrintLine(l => { l.Value = order.Restaurant.City; l.SetStyle(s => { s.Align = TextAlign.Middle; }); })
+              .PrintLine(l => { l.Value = order.Restaurant.PostalCode; l.SetStyle(s => { s.Align = TextAlign.Middle; }); })
+              .PrintLine(l => { l.Value = order.Restaurant.Phone; l.SetStyle(s => { s.Align = TextAlign.Middle; s.FontSize = FontSize.Large; }); })
+            #endregion
+
+              .PrintHorizontalLine(l => l.Size = "100%")
+
+            #region Order
+                .PrintLine(l => { l.Value = order.OrderNo; l.SetStyle(s => { s.Align = TextAlign.Middle; s.Bold = true; }); })
+              .PrintLine(l => { l.Value = order.OrderDate; l.SetStyle(s => { s.Align = TextAlign.Middle; }); })
+              .PrintLine(l => { l.Value = order.TableInfo; l.SetStyle(s => { s.Align = TextAlign.Middle; }); })
+              .PrintLine(l => { l.Value = order.Server; l.SetStyle(s => { s.Align = TextAlign.Middle; }); })
+            #endregion
+
+              .PrintHorizontalLine(l => l.Size = "100%")
+
+            #region Check Items
+                .PrintGrid(g =>
+                {
+                    g.ColumnSpace = 2;
+                    g.WithHeader(h => h
+
+                                  .Column(c => c.SetContent(cc => cc.Value = "Qty"))
+                                  .Column(c => c.SetContent(cc => cc.Value = "Item"))
+                                  .Column(c => c.SetContent(cc => { cc.Value = "Price"; cc.SetStyle(s => s.Direction = TextDirection.Right); }))
+                             );
+
+
+                    foreach (var i in check.Items)
+                    {
+                        g.AddRow(r => r.
+
+                            Bound(c => c.SetContent(cc =>
+                            {
+                                if (i.Type == ItemType.MenuItem)
+                                {
+                                    cc.Value = i.Quantity.ToString();
+                                    cc.SetStyle(s => s.Bold = true);
+                                }
+
+                            }))
+
+                           .Bound(c => c.SetContent(cc =>
+                           {
+
+                               cc.Value = i.Description;
+                               if (i.Type == ItemType.MenuItem)
+                                   cc.SetStyle(s => { s.FontSize = FontSize.Large; s.Bold = true; });
+                               if (i.Type == ItemType.Modifier)
+                                   cc.SetStyle(s => { s.FontSize = FontSize.Small; s.Bold = true; });
+                               if (i.Type == ItemType.Alternative)
+                                   cc.SetStyle(s => { s.FontSize = FontSize.Small; s.Indent = 1; });
+                               if (i.Type == ItemType.Note)
+                                   cc.SetStyle(s => { s.FontSize = FontSize.Small; s.Indent = 1; });
+
+                           }))
+
+
+                           .Bound(c => c.SetContent(cc =>
+                           {
+                               if (i.Type == ItemType.MenuItem)
+                               {
+                                   cc.Value = i.Price.ToString("C2");
+                                   cc.SetStyle(s => { s.Bold = true; s.Direction = TextDirection.Right; });
+                               }
+                           })));
+
+                    };
+
+                })
+            #endregion
+
+            #region Summary
+                .PrintGrid(g =>
+                {
+                    g.ColumnSpace = 6;
+                    g.WithHeader(h => h.Visible = false);
+
+                    g.AddRow(r => r.Bound(c => c.SetContent(cc =>
+                    {
+                        cc.Value = "Subtotal";
+                        cc.SetStyle(s => { s.Bold = true; s.Align = TextAlign.Right; });
+                    }))
+
+                       .Bound(c => c.SetContent(cc =>
+                       {
+                           cc.Value = check.PaymentSummary.Total.ToString("C2");
+                           cc.SetStyle(s => { s.Bold = true; s.Align = TextAlign.Right; });
+                       })));
+
+                    g.AddRow(r => r.Bound(c => c.SetContent(cc =>
+                    {
+                        cc.Value = "Total Discount";
+                        cc.SetStyle(s => { s.Bold = true; s.Align = TextAlign.Right; });
+                    }))
+
+                      .Bound(c => c.SetContent(cc =>
+                      {
+                          cc.Value = check.PaymentSummary.Discount.ToString("C2");
+                          cc.SetStyle(s => { s.Bold = true; s.Align = TextAlign.Right; });
+                      })));
+
+                    g.AddRow(r => r.Bound(c => c.SetContent(cc =>
+                    {
+                        cc.Value = check.PaymentSummary.GratuityDisplayText;
+                        cc.SetStyle(s => { s.Bold = true; s.Align = TextAlign.Right; });
+                    }))
+
+                      .Bound(c => c.SetContent(cc =>
+                      {
+                          cc.Value = check.PaymentSummary.CheckTotal.ToString("C2");
+                          cc.SetStyle(s => { s.Bold = true; s.Align = TextAlign.Right; });
+                      })));
+
+                    g.AddRow(r => r.Bound(c => c.SetContent(cc =>
+                    {
+                        cc.Value = $"{check.PaymentSummary.GratuityDisplayText} Tax";
+                        cc.SetStyle(s => { s.Bold = true; s.Align = TextAlign.Right; });
+                    }))
+
+                      .Bound(c => c.SetContent(cc =>
+                      {
+                          cc.Value = check.PaymentSummary.GratuityTax.ToString("C2");
+                          cc.SetStyle(s => { s.Bold = true; s.Align = TextAlign.Right; });
+                      })));
+
+                    g.AddRow(r => r.Bound(c => c.SetContent(cc =>
+                    {
+                        cc.Value = "HST";
+                        cc.SetStyle(s => { s.Bold = true; s.Align = TextAlign.Right; });
+                    }))
+
+                     .Bound(c => c.SetContent(cc =>
+                     {
+                         cc.Value = check.PaymentSummary.Tax.ToString("C2");
+                         cc.SetStyle(s => { s.Bold = true; s.Align = TextAlign.Right; });
+                     })));
+
+                })
+            #endregion
+
+              .PrintLine(l => { l.Value = $"Check #{check.CheckNo} Total:"; l.SetStyle(s => { s.Align = TextAlign.Middle; }); })
+              .PrintLine(l => { l.Value = check.PaymentSummary.Total.ToString("C2"); l.SetStyle(s => { s.Align = TextAlign.Middle; s.FontSize = FontSize.Large; }); })
+
+              .PrintHorizontalLine(l => l.Size = "100%")
+
+            #region Card Holder Signature
+
+              .PrintGrid(g =>
+              {
+                  g.Visible = order.ShowTipsSegment;
+                  g.ColumnSpace = 6;
+                  g.WithHeader(h => h.Visible = false);
+
+                  g.AddRow(r => r.Bound(c => c.SetContent(cc =>
+                  {
+                      cc.Value = "Tip :";
+                      cc.SetStyle(s => { s.Align = TextAlign.Left; s.FontSize = FontSize.Large; s.Bold = true; });
+                  }))
+
+                     .Bound(c => c.SetContent(cc =>
+                     {
+                         cc.Value = "$";
+                         cc.SetStyle(s => { s.UnderLine = true; });
+                         cc.SetSpace(sp => sp.Size = "70%");
+                     })));
+
+                  g.AddRow(r => r.Bound(c => c.SetContent(cc =>
+                  {
+                      cc.Value = "Total :";
+                      cc.SetStyle(s => { s.Align = TextAlign.Left; s.FontSize = FontSize.Large; s.Bold = true; });
+                  }))
+
+                    .Bound(c => c.SetContent(cc =>
+                    {
+                        cc.Value = "$";
+                        cc.SetStyle(s => { s.UnderLine = true; });
+                        cc.SetSpace(sp => sp.Size = "70%");
+                    })));
+
+              })
+
+              .PrintLine(l => { l.Value = "CardHolder Signature :"; l.SetStyle(s => { s.Bold = true; }); })
+              .PrintLine(l => { l.Value = check.ContactDisplayName; })
+
+              .PrintHorizontalLine(l => l.Size = "100%")
+
+            #endregion
+                .PrintNewLine()
+
+              .PrintLine(l => { l.Value = "Sold to"; })
+              .PrintLine(l => { l.Value = check.ContactDisplayName; l.SetStyle(s => { s.Align = TextAlign.Middle; s.Bold = true; }); })
+
+              .PrintNewLine()
+            #region Tenders
+
+              .PrintLine(l => { l.Value = "Paid By"; })
+              .PrintHorizontalLine(l => l.Size = "100%")
+              .PrintGrid(g =>
+              {
+                  //g.WithHeader(h => h
+
+                  //.Column(c => c.SetContent(cc => { cc.Value = "Paid By"; cc.SetStyle(s => { s.Align = TextAlign.Left; s.Bold = true; }); })
+                  //));
+                  g.WithHeader(h => h.Visible = false);
+
+                  g.ColumnSpace = 6;
+
+                  foreach (var i in check.Payments)
+                  {
+                      g.AddRow(r => r.
+
+                          Bound(c => c.SetContent(cc =>
+                          {
+                              cc.Value = i.TenderDescription;
+
+                          }))
+
+                         .Bound(c => c.SetContent(cc =>
+                         {
+                             cc.Value = i.Amount.ToString("C2");
+                             cc.SetStyle(s => { s.Bold = true; s.Direction = TextDirection.Right; });
+
+                         })));
+
+                      if (i.Gratuity.HasValue)
+                      {
+                          if (i.Gratuity.Value != 0)
+                          {
+                              g.AddRow(r => r.
+
+                              Bound(c => c.SetContent(cc =>
+                              {
+                                  cc.Value = "Cash Back / Tip";
+
+                              }))
+
+                             .Bound(c => c.SetContent(cc =>
+                             {
+                                 cc.Value = i.Gratuity.Value.ToString("C2");
+                                 cc.SetStyle(s => { s.Bold = true; s.Align = TextAlign.Right; });
+
+                             })));
+                          }
+
+                      }
+
+
+                  };
+
+              })
+            #endregion
+
+            #region Restaurant Footer
+               .PrintHorizontalLine(l => l.Size = "100%")
+
+             .PrintLine(l => { l.Value = order.Restaurant.FooterText; l.SetStyle(s => { s.Align = TextAlign.Middle; s.Bold = true; s.FontSize = FontSize.Large; }); });
+
+            #endregion
+
+            documents.Add(document);
+
+        }
+
+        return documents;
+
+    }
+}
+

@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fluent.Print.API", "Fluent.Print.API\Fluent.Print.API.csproj", "{9AB44731-E464-4EC9-9D56-AE45DDB79CE2}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{89A6C18C-10AC-4819-9700-E0BF8C4CDF1B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fluent.Print.API.Test", "Fluent.Print.API.Test\Fluent.Print.API.Test.csproj", "{C925B35D-0AE5-47EF-B741-A8614D9C90AF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9AB44731-E464-4EC9-9D56-AE45DDB79CE2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9AB44731-E464-4EC9-9D56-AE45DDB79CE2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9AB44731-E464-4EC9-9D56-AE45DDB79CE2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9AB44731-E464-4EC9-9D56-AE45DDB79CE2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C925B35D-0AE5-47EF-B741-A8614D9C90AF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C925B35D-0AE5-47EF-B741-A8614D9C90AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C925B35D-0AE5-47EF-B741-A8614D9C90AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C925B35D-0AE5-47EF-B741-A8614D9C90AF}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{C925B35D-0AE5-47EF-B741-A8614D9C90AF} = {89A6C18C-10AC-4819-9700-E0BF8C4CDF1B}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B0014110-4D52-4ED2-AC81-12270EA127D8}
+	EndGlobalSection
+EndGlobal
